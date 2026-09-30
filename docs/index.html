@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bull &amp; Bear Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F0F3EA; --panel:#FAFBF6; --ink:#16213A; --muted:#566178; --rule:#C6CFBF;
+  --bull:#1E6B4E; --bull-tint:#D9EADB; --bear:#A5281F; --bear-tint:#F3D9D4;
+  --accent:#1F3A93; --warn:#7A5B00; --warn-tint:#F6E9B8;
+  --font:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10161C; --panel:#17202A; --ink:#E6ECF2; --muted:#95A2B4; --rule:#2B3743;
+    --bull:#63C99E; --bull-tint:#173629; --bear:#F28C82; --bear-tint:#3B1E1C;
+    --accent:#93B2FF; --warn:#F0CE6B; --warn-tint:#3A3014;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10161C; --panel:#17202A; --ink:#E6ECF2; --muted:#95A2B4; --rule:#2B3743;
+  --bull:#63C99E; --bull-tint:#173629; --bear:#F28C82; --bear-tint:#3B1E1C;
+  --accent:#93B2FF; --warn:#F0CE6B; --warn-tint:#3A3014;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45;
+  font-variant-numeric:tabular-nums;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:1.5rem;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.01em}
+.head{padding-bottom:10px;border-bottom:3px double var(--ink);margin-bottom:12px}
+.sub{color:var(--muted);font-size:.85rem;margin-top:4px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.78rem;border:1px solid var(--rule)}
+.pill.open{color:var(--bull);border-color:var(--bull)}
+.banner{border:1px solid var(--warn);background:var(--warn-tint);color:var(--ink);padding:8px 10px;border-radius:6px;margin:10px 0;font-size:.9rem}
+.banner b{color:var(--warn)}
+.macro{display:flex;gap:16px;overflow-x:auto;padding:8px 0 10px;border-bottom:1px solid var(--rule);margin-bottom:12px;scrollbar-width:thin}
+.macro div{flex:0 0 auto;font-size:.82rem;color:var(--muted)}
+.macro strong{display:block;color:var(--ink);font-size:.98rem;font-weight:500}
+.up{color:var(--bull)} .dn{color:var(--bear)}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tab,.chip,.btn{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:6px;padding:7px 12px;cursor:pointer;min-height:40px}
+.tab[aria-selected="true"],.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#0b1220}}
+.btn.small{min-height:34px;padding:4px 10px;font-size:.88rem}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{padding:5px 11px;min-height:36px;font-size:.9rem}
+input[type=search],input[type=text],input[type=number],textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;width:100%}
+textarea{min-height:70px;resize:vertical}
+.legend{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin:10px 0 2px;padding:0 2px}
+.legend .b{color:var(--bull)} .legend .r{color:var(--bear)}
+ol.ledger{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.item{border-bottom:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:24px 1fr auto;gap:2px 8px;width:100%;text-align:left;font:inherit;color:inherit;
+  background:transparent;border:0;padding:11px 2px 9px;cursor:pointer;align-items:baseline}
+.row:hover{background:color-mix(in srgb,var(--panel) 70%,transparent)}
+.rk{color:var(--muted);font-size:.82rem;text-align:right}
+.tk b{font-size:1.06rem;font-weight:700}
+.nm{color:var(--muted);font-size:.84rem;margin-left:6px}
+.px{text-align:right;font-weight:500}
+.px em{font-style:normal;font-size:.85rem;margin-left:6px}
+.tacct{grid-column:2 / 4;display:grid;grid-template-columns:1fr 1fr;align-items:center;margin-top:5px}
+.side{display:flex;align-items:center;gap:6px;height:22px}
+.side.bull{padding-right:0;border-right:2px solid var(--ink)}
+.side b{font-size:.8rem;font-weight:500;min-width:22px}
+.side.bull b{text-align:right;color:var(--bull)} .side.bear b{color:var(--bear)}
+.track{flex:1;display:flex;height:12px}
+.bull .track{justify-content:flex-end}
+.track i{display:block;height:100%}
+.bull .track i{background:var(--bull);border-radius:2px 0 0 2px}
+.bear .track i{background:var(--bear);border-radius:0 2px 2px 0}
+.side.bear{padding-left:0}
+.call{grid-column:2 / 4;font-size:.84rem;color:var(--muted);margin-top:3px}
+.call .dir{font-weight:700}
+.call .dir.long{color:var(--bull)} .call .dir.short{color:var(--bear)}
+.call .go{color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:0 6px;margin-left:6px;font-size:.78rem}
+.detail{padding:4px 2px 18px 34px}
+@media (max-width:520px){.detail{padding-left:2px}}
+.detail h3{font-size:.98rem;margin:16px 0 6px;font-weight:700}
+.tag{display:inline-block;font-size:.72rem;border:1px solid var(--rule);border-radius:4px;padding:0 5px;margin-left:6px;color:var(--muted);vertical-align:1px}
+.grid{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:.93rem}
+.grid dt{color:var(--muted)} .grid dd{margin:0}
+.why{display:block;color:var(--muted);font-size:.8rem}
+.total{border-top:3px double var(--ink);padding-top:6px;margin-top:8px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.cols{grid-template-columns:1fr}}
+.cols h4{margin:0 0 4px;font-size:.9rem}
+.cols .b h4{color:var(--bull)} .cols .r h4{color:var(--bear)}
+ul.plain{margin:0;padding-left:18px;font-size:.9rem}
+ul.plain li{margin:2px 0}
+.flag{background:var(--warn-tint);border-left:3px solid var(--warn);padding:4px 8px;margin:4px 0;font-size:.88rem}
+table.fund{width:100%;border-collapse:collapse;font-size:.86rem}
+table.fund td{padding:5px 4px;border-bottom:1px solid var(--rule);vertical-align:top}
+table.fund td:nth-child(2){text-align:right;white-space:nowrap;font-weight:500}
+table.fund .cite{display:block;color:var(--muted);font-size:.76rem;font-weight:400;white-space:normal;text-align:left}
+.nf{color:var(--muted);font-style:italic}
+.news a{color:var(--accent)} .news small{color:var(--muted)}
+.notes{font-size:.8rem;color:var(--muted);margin-top:22px;border-top:1px solid var(--rule);padding-top:10px}
+.empty{padding:26px 6px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.stats div{border:1px solid var(--rule);border-radius:6px;padding:8px;background:var(--panel)}
+.stats span{display:block;color:var(--muted);font-size:.76rem}
+.stats strong{font-size:1.1rem}
+@media (max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}}
+.trade{border-bottom:1px solid var(--rule);padding:10px 2px}
+.trade .top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+dialog{border:1px solid var(--ink);border-radius:8px;background:var(--panel);color:var(--ink);padding:16px;width:min(440px,94vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:no-preference){.detail{animation:open .16s ease-out}@keyframes open{from{opacity:.4}to{opacity:1}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <h1>Bull &amp; Bear Ledger</h1>
+    <div class="sub" id="asof">Loading scan...</div>
+  </header>
+  <div id="banners"></div>
+  <div class="macro" id="macro" aria-label="Market backdrop"></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-ideas" aria-selected="true" data-tab="ideas">Ideas</button>
+    <button class="tab" role="tab" id="tab-log" aria-selected="false" data-tab="log">Paper log</button>
+  </div>
+
+  <section id="ideas">
+    <input type="search" id="q" placeholder="Search ticker or company" aria-label="Search ticker or company">
+    <div class="chips" id="chips"></div>
+    <div class="legend" aria-hidden="true"><span class="b">Bull score</span><span class="r">Bear score</span></div>
+    <ol class="ledger" id="list"></ol>
+  </section>
+
+  <section id="log" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="chips">
+      <button class="btn primary small" id="newTrade">New paper trade</button>
+      <button class="btn small" id="exportCsv">Export CSV</button>
+      <button class="btn small" id="clearLog">Clear log</button>
+    </div>
+    <div id="trades"></div>
+  </section>
+
+  <div class="notes" id="notes"></div>
+</div>
+
+<dialog id="tradeDlg" aria-labelledby="tdTitle">
+  <h2 id="tdTitle" style="margin:0 0 4px;font-size:1.1rem">New paper trade</h2>
+  <div class="two">
+    <div><label for="f_ticker">Ticker</label><input type="text" id="f_ticker" autocapitalize="characters"></div>
+    <div><label for="f_dir">Direction</label><select id="f_dir" style="font:inherit;padding:8px;width:100%;background:var(--panel);color:var(--ink);border:1px solid var(--rule);border-radius:6px"><option value="long">Long</option><option value="short">Short</option></select></div>
+    <div><label for="f_entry">Entry</label><input type="number" step="any" id="f_entry"></div>
+    <div><label for="f_stop">Stop</label><input type="number" step="any" id="f_stop"></div>
+    <div><label for="f_t1">Target 1</label><input type="number" step="any" id="f_t1"></div>
+    <div><label for="f_shares">Shares</label><input type="number" step="1" id="f_shares"></div>
+  </div>
+  <label for="f_thesis">Thesis (one or two sentences)</label>
+  <textarea id="f_thesis"></textarea>
+  <div class="actions"><button class="btn" id="tdCancel">Cancel</button><button class="btn primary" id="tdSave">Save trade</button></div>
+</dialog>
+
+<dialog id="closeDlg" aria-labelledby="cdTitle">
+  <h2 id="cdTitle" style="margin:0 0 4px;font-size:1.1rem">Close trade</h2>
+  <label for="c_exit">Exit price</label><input type="number" step="any" id="c_exit">
+  <label for="c_right">What I got right</label><textarea id="c_right"></textarea>
+  <label for="c_wrong">What I got wrong</label><textarea id="c_wrong"></textarea>
+  <div class="actions"><button class="btn" id="cdCancel">Cancel</button><button class="btn primary" id="cdSave">Close trade</button></div>
+</dialog>
+
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const state = { data: null, filter: "actionable", q: "", open: new Set(), tab: "ideas", loadedAt: 0, nextIn: 60 };
+const LOG_KEY = "ledger.trades.v1";
+const FILTERS = [["actionable","Trade now"],["all","All"],["long","Long"],["short","Short"],["US","US"],["TSX","TSX"]];
+
+/* ---------- formatting ---------- */
+const cur = (i) => (i && i.currency === "CAD" ? "C$" : "$");
+const num = (v, d = 2) => (v == null || isNaN(v)) ? "NOT FOUND" : Number(v).toLocaleString(undefined, {minimumFractionDigits: d, maximumFractionDigits: d});
+const money = (v, i, d = 2) => (v == null ? "NOT FOUND" : cur(i) + num(v, d));
+const pct = (v, d = 1) => (v == null ? "NOT FOUND" : (v >= 0 ? "+" : "") + (v * 100).toFixed(d) + "%");
+const cls = (v) => (v == null ? "" : v >= 0 ? "up" : "dn");
+function ago(iso){
+  const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (m < 1) return "just now"; if (m < 60) return m + " min ago";
+  const h = Math.floor(m / 60); return h < 48 ? h + " h ago" : Math.floor(h / 24) + " days ago";
+}
+
+/* ---------- data ---------- */
+async function load(){
+  try{
+    const r = await fetch("data/latest.json?ts=" + Date.now(), {cache: "no-store"});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    state.data = await r.json();
+    state.loadedAt = Date.now(); state.nextIn = 60;
+    renderAll();
+  }catch(e){
+    $("#asof").textContent = "Could not load data/latest.json (" + e.message + "). Run the scan from the Actions tab.";
+  }
+}
+
+/* ---------- ideas ---------- */
+function visible(){
+  const d = state.data; if(!d) return [];
+  const q = state.q.trim().toLowerCase();
+  return d.ideas.filter((i) => {
+    if(q && !(i.ticker.toLowerCase().includes(q) || i.name.toLowerCase().includes(q))) return false;
+    switch(state.filter){
+      case "actionable": return i.actionable;
+      case "long": return i.direction === "long";
+      case "short": return i.direction === "short";
+      case "US": return i.market === "US";
+      case "TSX": return i.market === "TSX";
+      default: return true;
+    }
+  });
+}
+function row(i){
+  const open = state.open.has(i.ticker);
+  return `<li class="item"><button class="row" aria-expanded="${open}" data-t="${esc(i.ticker)}">
+    <span class="rk">${i.rank}</span>
+    <span class="tk"><b>${esc(i.ticker)}</b><span class="nm">${esc(i.name)}</span></span>
+    <span class="px">${money(i.price, i)}<em class="${cls(i.change_pct)}">${pct(i.change_pct)}</em></span>
+    <span class="tacct" role="img" aria-label="Bull score ${i.long_score}, bear score ${i.short_score}">
+      <span class="side bull"><b>${i.long_score}</b><span class="track"><i style="width:${i.long_score}%"></i></span></span>
+      <span class="side bear"><span class="track"><i style="width:${i.short_score}%"></i></span><b>${i.short_score}</b></span>
+    </span>
+    <span class="call"><span class="dir ${i.direction}">${i.direction === "long" ? "Long" : "Short"}</span> ${esc(i.setup)}, conviction ${i.conviction}${i.actionable ? '<span class="go">meets rules</span>' : ""}${i.flags.length ? ` <span class="dn">${i.flags.length} flag${i.flags.length > 1 ? "s" : ""}</span>` : ""}</span>
+  </button>${open ? detail(i) : ""}</li>`;
+}
+function detail(i){
+  const p = i.plan, x = i.indicators, c = (v) => money(v, i);
+  const ind = [
+    ["Price", `${c(i.price)} <span class="tag">fact</span> <span class="why">Yahoo Finance, ${esc(i.price_time)}</span>`],
+    ["50-day / 200-day MA", `${c(x.sma50)} / ${c(x.sma200)} <span class="tag">calc</span>`],
+    ["RSI(14)", `${x.rsi == null ? "NOT FOUND" : x.rsi} <span class="tag">calc</span>`],
+    ["ATR(14)", `${c(x.atr)} (${x.atr_pct == null ? "NOT FOUND" : x.atr_pct + "%"} of price) <span class="tag">calc</span>`],
+    ["Volume vs 20-day avg", `${x.rel_vol == null ? "NOT FOUND" : x.rel_vol + "x"} <span class="why">${esc(x.rel_vol_src)}</span>`],
+    ["Support / resistance (20-day)", `${c(x.lo20)} / ${c(x.hi20)} <span class="tag">calc</span>`],
+    ["52-week range", `${c(x.lo52)} to ${c(x.hi52)} <span class="tag">calc</span>`],
+  ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+  const fl = i.flags.map((f) => `<div class="flag">${esc(f)}</div>`).join("");
+  const e = i.earnings ? `<dt>Next earnings</dt><dd>${esc(i.earnings.date)}${i.earnings.days != null ? " (in " + i.earnings.days + " days)" : ""} <span class="tag">fact</span> <span class="why">Yahoo Finance calendar; confirm on the company's investor page</span></dd>` : "";
+  const news = (i.news || []).length ? `<h3>Recent headlines <span class="tag">fact</span></h3><ul class="plain news">${i.news.map((n) => `<li>${n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener noreferrer">${esc(n.title)}</a>` : esc(n.title)} <small>${esc(n.source)}, ${esc(n.published)}</small></li>`).join("")}</ul>` : "";
+  return `<div class="detail">
+    ${fl}
+    <h3>Paper trade plan <span class="tag">calc</span></h3>
+    <dl class="grid">
+      <dt>Entry zone</dt><dd>${c(p.entry_zone[0])} to ${c(p.entry_zone[1])}<span class="why">Last price, plus or minus a quarter ATR</span></dd>
+      <dt>Stop-loss</dt><dd>${c(p.stop)}<span class="why">${esc(p.stop_why)}</span></dd>
+      <dt>Target 1</dt><dd>${c(p.t1)}<span class="why">${esc(p.t1_why)}</span></dd>
+      <dt>Target 2</dt><dd>${c(p.t2)}<span class="why">${esc(p.t2_why)}</span></dd>
+      <dt>Risk / reward</dt><dd>${p.rr1}R to Target 1, ${p.rr2}R to Target 2<span class="why">${esc(p.rr_math)}</span></dd>
+      <dt>Size</dt><dd class="total"><b>${p.shares.toLocaleString()} shares</b> (${c(p.position_value, 0)})<span class="why">${esc(p.sizing_math)}</span></dd>
+      <dt>Horizon</dt><dd>${esc(p.horizon)} <span class="tag">opinion</span></dd>
+    </dl>
+    <p><button class="btn primary small" data-log="${esc(i.ticker)}">Log paper trade</button></p>
+
+    <h3>Bull case and bear case <span class="tag">calc</span></h3>
+    <div class="cols">
+      <div class="b"><h4>${i.direction === "long" ? "Why it could work" : "What the bulls would say"}</h4><ul class="plain">${(i.direction === "long" ? i.bull : i.bear).map((t) => `<li>${esc(t)}</li>`).join("") || "<li>None triggered</li>"}</ul></div>
+      <div class="r"><h4>${i.direction === "long" ? "What the bears would say" : "Why it could work"}</h4><ul class="plain">${(i.direction === "long" ? i.bear : i.bull).map((t) => `<li>${esc(t)}</li>`).join("") || "<li>None triggered</li>"}</ul></div>
+    </div>
+    <h3>What may already be priced in</h3>
+    <p style="margin:0;font-size:.92rem">${esc(i.priced_in)} <span class="tag">calc</span><span class="why">Price action only. For news and expectations, ask Claude to review this ticker.</span></p>
+    <h3>What would invalidate it <span class="tag">opinion</span></h3>
+    <ul class="plain">${i.invalidation.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
+
+    <h3>Indicators</h3><dl class="grid">${ind}${e}</dl>
+    ${news}
+    ${fundamentals(i)}
+  </div>`;
+}
+function fundamentals(i){
+  const f = i.fundamentals;
+  if(!f) return `<h3>Fundamentals</h3><p class="nf">NOT FOUND: fundamentals load only for the top-ranked ideas. Rank ${i.rank} is outside that group.</p>`;
+  if(!f.available) return `<h3>Fundamentals</h3><p class="nf">${esc(f.reason)}</p>`;
+  const rows = f.rows.map((r) => `<tr><td>${esc(r.label)}<span class="tag">${r.kind === "FACT" ? "fact" : "calc"}</span><span class="cite">${esc(r.cite)}</span></td><td class="${r.value === "NOT FOUND" ? "nf" : ""}">${esc(r.value)}</td></tr>`).join("");
+  const fl = (f.flags || []).map((t) => `<div class="flag">${esc(t)}</div>`).join("");
+  return `<h3>Fundamentals from SEC 10-K filings</h3>${fl}<table class="fund"><tbody>${rows}</tbody></table>
+    <p class="why"><a href="${esc(f.filings_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Open this company's 10-K filings on EDGAR</a>. ${esc(f.note)}</p>`;
+}
+
+/* ---------- chrome ---------- */
+function renderHeader(){
+  const d = state.data; if(!d) return;
+  $("#asof").innerHTML = `Scan ${esc(d.generated_et)}, ${ago(d.generated_at)} <span class="pill ${d.market_open ? "open" : ""}">${d.market_open ? "Market open" : "Market closed"}</span> <span class="pill" id="cd"></span>`;
+  const b = [];
+  if(d.demo) b.push(`<div class="banner"><b>Demo data.</b> These prices are made up so you can preview the layout. Run the scan from the Actions tab to load real data.</div>`);
+  const age = (Date.now() - new Date(d.generated_at).getTime()) / 60000;
+  if(!d.demo && d.market_open && age > 20) b.push(`<div class="banner"><b>Stale scan.</b> The last scan is ${Math.round(age)} minutes old. GitHub can delay scheduled runs; use Run workflow in the Actions tab for a fresh one.</div>`);
+  if(!d.demo && d.failed && d.failed.length) b.push(`<div class="banner">No data for ${d.failed.length} ticker${d.failed.length > 1 ? "s" : ""}: ${esc(d.failed.join(", "))}.</div>`);
+  $("#banners").innerHTML = b.join("");
+  $("#macro").innerHTML = d.macro.map((m) => `<div>${esc(m.label)}<strong>${m.value == null ? "NOT FOUND" : num(m.value, m.value < 20 ? 2 : 0)}</strong><span class="${cls(m.change_pct)}">${m.change_pct == null ? "" : pct(m.change_pct, 2)}</span></div>`).join("");
+  $("#notes").innerHTML = `<b>Read this.</b> ${d.notes.map(esc).join(" ")} Account assumed: ${cur()}${num(d.account.size, 0)} paper account, ${d.account.risk_pct}% risk per trade.`;
+}
+function renderChips(){
+  $("#chips").innerHTML = FILTERS.map(([k, l]) => `<button class="chip" aria-pressed="${state.filter === k}" data-f="${k}">${l}</button>`).join("");
+}
+function renderList(){
+  const v = visible();
+  const n = v.length;
+  $("#list").innerHTML = n ? v.map(row).join("") : `<li class="empty">No ideas match. ${state.filter === "actionable" ? "Nothing meets the rules right now (conviction 60+, at least 1.5R, liquid). Try All." : "Clear the search or pick another filter."}</li>`;
+}
+function renderAll(){ renderHeader(); renderChips(); renderList(); renderLog(); }
+
+/* ---------- paper log ---------- */
+const getLog = () => { try { return JSON.parse(localStorage.getItem(LOG_KEY) || "[]"); } catch { return []; } };
+const setLog = (a) => { try { localStorage.setItem(LOG_KEY, JSON.stringify(a)); } catch {} };
+const sgn = (t) => (t.dir === "long" ? 1 : -1);
+const rMult = (t) => { const r = Math.abs(t.entry - t.stop); return r ? sgn(t) * (t.exit - t.entry) / r : null; };
+function renderLog(){
+  const log = getLog(), closed = log.filter((t) => t.status === "closed");
+  const rs = closed.map(rMult).filter((v) => v != null);
+  const wins = rs.filter((r) => r > 0).length;
+  const pnl = closed.reduce((s, t) => s + sgn(t) * (t.exit - t.entry) * t.shares, 0);
+  $("#stats").innerHTML = [
+    ["Closed trades", closed.length + " of 20 to review"],
+    ["Win rate", rs.length ? Math.round(wins / rs.length * 100) + "%" : "NOT FOUND"],
+    ["Average R", rs.length ? (rs.reduce((a, b) => a + b, 0) / rs.length).toFixed(2) : "NOT FOUND"],
+    ["Paper P/L", rs.length ? (pnl >= 0 ? "+" : "-") + "$" + num(Math.abs(pnl), 0) : "NOT FOUND"],
+  ].map(([k, v]) => `<div><span>${k}</span><strong>${v}</strong></div>`).join("");
+  $("#trades").innerHTML = log.length ? log.slice().reverse().map((t) => {
+    const r = t.status === "closed" ? rMult(t) : null;
+    return `<div class="trade"><div class="top"><span><b>${esc(t.ticker)}</b> ${t.dir === "long" ? "Long" : "Short"}, ${t.shares} sh, entry ${num(t.entry)}, stop ${num(t.stop)}${t.t1 ? ", T1 " + num(t.t1) : ""}</span>
+      <span>${t.status === "closed" ? `Exit ${num(t.exit)}, <b class="${r >= 0 ? "up" : "dn"}">${r == null ? "" : r.toFixed(2) + "R"}</b>` : `<button class="btn small" data-close="${t.id}">Close</button>`} <button class="btn small" data-del="${t.id}" aria-label="Delete trade">Delete</button></span></div>
+      <div class="why">${esc(t.date)}${t.thesis ? " - " + esc(t.thesis) : ""}${t.right ? "<br>Right: " + esc(t.right) : ""}${t.wrong ? "<br>Wrong: " + esc(t.wrong) : ""}</div></div>`;
+  }).join("") : `<div class="empty">No paper trades yet. Open an idea and tap Log paper trade, or add one by hand.</div>`;
+}
+function openTrade(pre){
+  const i = pre ? state.data.ideas.find((x) => x.ticker === pre) : null;
+  $("#f_ticker").value = i ? i.ticker : ""; $("#f_dir").value = i ? i.direction : "long";
+  $("#f_entry").value = i ? i.plan.entry : ""; $("#f_stop").value = i ? i.plan.stop : "";
+  $("#f_t1").value = i ? i.plan.t1 : ""; $("#f_shares").value = i ? i.plan.shares : "";
+  $("#f_thesis").value = ""; $("#tradeDlg").showModal();
+}
+function csv(){
+  const cols = ["date","ticker","dir","entry","stop","t1","shares","thesis","status","exit","exitDate","right","wrong"];
+  const q = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+  const body = getLog().map((t) => cols.map((c) => q(t[c])).join(",")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([cols.join(",") + "\n" + body], {type: "text/csv"}));
+  a.download = "paper-trades.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ---------- events ---------- */
+let closingId = null;
+document.addEventListener("click", (ev) => {
+  const t = ev.target.closest("button"); if(!t) return;
+  if(t.dataset.tab){ state.tab = t.dataset.tab; document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === state.tab)); $("#ideas").hidden = state.tab !== "ideas"; $("#log").hidden = state.tab !== "log"; }
+  else if(t.dataset.f){ state.filter = t.dataset.f; renderChips(); renderList(); }
+  else if(t.dataset.t){ const k = t.dataset.t; state.open.has(k) ? state.open.delete(k) : state.open.add(k); renderList(); }
+  else if(t.dataset.log){ openTrade(t.dataset.log); }
+  else if(t.dataset.close){ closingId = t.dataset.close; $("#c_exit").value = ""; $("#c_right").value = ""; $("#c_wrong").value = ""; $("#closeDlg").showModal(); }
+  else if(t.dataset.del){ if(confirm("Delete this trade from the log?")){ setLog(getLog().filter((x) => String(x.id) !== t.dataset.del)); renderLog(); } }
+});
+$("#q").addEventListener("input", (e) => { state.q = e.target.value; renderList(); });
+$("#newTrade").addEventListener("click", () => openTrade(null));
+$("#exportCsv").addEventListener("click", csv);
+$("#clearLog").addEventListener("click", () => { if(confirm("Delete every paper trade in this browser?")){ setLog([]); renderLog(); } });
+$("#tdCancel").addEventListener("click", () => $("#tradeDlg").close());
+$("#cdCancel").addEventListener("click", () => $("#closeDlg").close());
+$("#tdSave").addEventListener("click", () => {
+  const n = (id) => parseFloat($(id).value);
+  const t = { id: Date.now(), date: new Date().toISOString().slice(0, 10), ticker: $("#f_ticker").value.trim().toUpperCase(), dir: $("#f_dir").value,
+    entry: n("#f_entry"), stop: n("#f_stop"), t1: n("#f_t1") || null, shares: parseInt($("#f_shares").value, 10), thesis: $("#f_thesis").value.trim(), status: "open" };
+  if(!t.ticker || isNaN(t.entry) || isNaN(t.stop) || !(t.shares > 0)){ alert("Ticker, entry, stop and shares are required."); return; }
+  if((t.dir === "long" && t.stop >= t.entry) || (t.dir === "short" && t.stop <= t.entry)){ alert("The stop must sit below entry for a long and above entry for a short."); return; }
+  const log = getLog(); log.push(t); setLog(log); $("#tradeDlg").close(); renderLog();
+});
+$("#cdSave").addEventListener("click", () => {
+  const ex = parseFloat($("#c_exit").value); if(isNaN(ex)){ alert("Enter the exit price."); return; }
+  const log = getLog(), t = log.find((x) => String(x.id) === String(closingId));
+  if(t){ t.status = "closed"; t.exit = ex; t.exitDate = new Date().toISOString().slice(0, 10); t.right = $("#c_right").value.trim(); t.wrong = $("#c_wrong").value.trim(); setLog(log); }
+  $("#closeDlg").close(); renderLog();
+});
+
+/* ---------- refresh loop ---------- */
+setInterval(() => {
+  state.nextIn -= 1;
+  const cd = $("#cd"); if(cd) cd.textContent = "refresh in " + Math.max(0, state.nextIn) + "s";
+  if(state.nextIn <= 0){ load(); state.nextIn = 60; }
+}, 1000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden && Date.now() - state.loadedAt > 30000) load(); });
+load();
+</script>
+</body>
+</html>
